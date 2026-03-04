@@ -1,122 +1,113 @@
-const User = require("../models/userModel");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const SECRET_KEY = process.env.SECRET_KEY;
-const { validationResult } = require("express-validator");
-const BlacklistToken = require("../models/blacklistToken");
+const authService = require("./auth.service");
+const { successResponse, errorResponse } = require("../../helpers/response");
 
 const authControllers = {
   login: async (req, res) => {
     try {
-      const { username, password, appSource } = req.body;
+      const { email, password } = req.body;
 
-      const user = await User.findOne({ username, appSource });
-      if (!user) {
-        return res.status(401).json({ message: "Username tidak ditemukan" });
-      }
+      const result = await authService.login(
+        email,
+        password,
+        process.env.SECRET_KEY,
+      );
 
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(401).json({ message: "password salah" });
-      }
-
-      const payload = {
-        id: user._id,
-        username: user.username,
-        name: user.name,
-        appSource: user.appSource,
-      };
-
-      const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
-
-      res.json({
-        success: true,
-        message: "Login berhasil",
-        token,
-        user: payload,
+      return successResponse(res, "Login berhasil", {
+        token: result.token,
+        user: result.user,
       });
     } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ success: false, message: "Terjadi kesalahan server" });
+      if (error.message === "USER_NOT_FOUND") {
+        return errorResponse(res, 401, "Validation Error", [
+          {
+            field: "email",
+            message: "Username tidak ditemukan",
+          },
+        ]);
+      }
+
+      if (error.message === "INVALID_PASSWORD") {
+        return errorResponse(res, 401, "Validation Error", [
+          {
+            field: "password",
+            message: "Password salah",
+          },
+        ]);
+      }
+
+      return errorResponse(res, 500, "Server Error", [
+        {
+          field: "server",
+          message: "Terjadi kesalahan server",
+        },
+      ]);
     }
   },
 
   register: async (req, res) => {
     try {
-      const { name, username, password, appSource } = req.body;
+      const { name, email, username, password } = req.body;
 
-      const existingUser = await User.findOne({ username });
-      if (existingUser) {
-        return res.status(400).json({ message: "Username sudah digunakan" });
+      await authService.register(name, email, username, password);
+
+      return successResponse(res, "Registrasi berhasil");
+    } catch (error) {
+      if (error.message === "EMAIL_EXISTS") {
+        return errorResponse(res, 400, "Validation Error", [
+          {
+            field: "email",
+            message: "Email sudah digunakan",
+          },
+        ]);
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const user = new User({
-        name,
-        username,
-        password: hashedPassword,
-        appSource,
-      });
-      await user.save();
-
-      res.json({ success: true, message: "Registrasi berhasil" });
-    } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ success: false, message: "Terjadi kesalahan server" });
+      return errorResponse(res, 500, "Server Error", [
+        {
+          field: "server",
+          message: "Terjadi kesalahan server",
+        },
+      ]);
     }
   },
 
   logout: async (req, res) => {
     try {
       const token = req.headers.authorization?.split(" ")[1];
-      if (!token) return res.status(400).json({ message: "Token diperlukan" });
 
-      const decoded = jwt.decode(token);
-      console.log("Decoded token:", decoded);
-      if (!decoded || !decoded.exp) {
-        return res.status(400).json({ message: "Token tidak valid" });
-      }
+      await authService.logout(token);
 
-      const expiredAt = new Date(decoded.exp * 1000);
-
-      await BlacklistToken.create({ token, expiredAt });
-
-      res.json({ message: "Logout berhasil, token di-blacklist" });
+      return successResponse(res, "Logout berhasil, token di-blacklist");
     } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ success: false, message: "Terjadi kesalahan server" });
+      return errorResponse(res, 500, "Server Error", [
+        {
+          field: "server",
+          message: "Terjadi kesalahan server",
+        },
+      ]);
     }
   },
 
   getProfile: async (req, res) => {
     try {
-      const userId = req.user.id;
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User tidak ditemukan" });
+      const result = await authService.getProfile(req.user.id);
+
+      return successResponse(res, "Berhasil mengambil data user", result);
+    } catch (error) {
+      if (error.message === "USER_NOT_FOUND") {
+        return errorResponse(res, 404, "Validation Error", [
+          {
+            field: "user",
+            message: "User tidak ditemukan",
+          },
+        ]);
       }
 
-      const result = {
-        id: user._id,
-        name: user.name,
-        username: user.username,
-      };
-      res.json({
-        success: true,
-        message: "Berhasil mengambil data user",
-        data: result,
-      });
-    } catch (error) {
-      console.error(error);
-      res
-        .status(500)
-        .json({ success: false, message: "Terjadi kesalahan server" });
+      return errorResponse(res, 500, "Server Error", [
+        {
+          field: "server",
+          message: "Terjadi kesalahan server",
+        },
+      ]);
     }
   },
 };
