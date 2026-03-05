@@ -8,8 +8,11 @@ const articleController = {
       const limit = parseInt(req.query.limit) || 10;
       const search = req.query.search || "";
 
-      const { articles, totalData, totalPages } =
-        await articleService.getAll({ page, limit, search });
+      const { articles, totalData, totalPages } = await articleService.getAll({
+        page,
+        limit,
+        search,
+      });
 
       if (articles.length === 0) {
         return errorResponse(res, 404, "Not Found", [
@@ -31,7 +34,7 @@ const articleController = {
       ]);
     }
   },
-  
+
   getByUserId: async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1;
@@ -60,6 +63,33 @@ const articleController = {
       return errorResponse(res, 500, "Server Error", [
         { field: "server", message: "Terjadi kesalahan server" },
       ]);
+    }
+  },
+
+  getById: async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      const article = await articleService.getArticleById(id);
+
+      if (!article) {
+        return res.status(404).json({
+          success: false,
+          message: "Article tidak ditemukan",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Berhasil mengambil data",
+        data: article,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: "Terjadi kesalahan server",
+      });
     }
   },
 };

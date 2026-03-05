@@ -66,6 +66,25 @@ const articlesService = {
       totalPages,
     };
   },
+
+  getArticleById: async (id) => {
+    const article = await Article.findOne({ _id: id }).populate(
+      "userId",
+    );
+
+    if (!article) {
+      return null;
+    }
+
+    return {
+      id: article._id,
+      title: article.title,
+      date: article.date.toISOString().split("T")[0],
+      image: `uploads/${article.image}`,
+      description: article.description,
+      name: article.userId?.name || null,
+    };
+  },
 };
 
 module.exports = articlesService;
