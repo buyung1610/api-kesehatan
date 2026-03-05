@@ -70,7 +70,7 @@ const articleController = {
     try {
       const id = req.params.id;
 
-      const article = await articleService.getArticleById(id);
+      const article = await articleService.getById(id);
 
       if (!article) {
         return res.status(404).json({
@@ -90,6 +90,82 @@ const articleController = {
         success: false,
         message: "Terjadi kesalahan server",
       });
+    }
+  },
+
+  createArticle: async (req, res) => {
+    try {
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return errorResponse(res, 400, "Bad Request", [
+          { field: "user", message: "User tidak ditemukan, silahkan login" },
+        ]);
+      }
+
+      if (!req.file) {
+        return errorResponse(res, 400, "Bad Request", [
+          { field: "image", message: "Image harus diupload" },
+        ]);
+      }
+
+      const article = await articleService.createArticle({
+        userId,
+        title: req.body.title,
+        description: req.body.description,
+        category: req.body.category,
+        date: req.body.date,
+        image: req.file ? req.file.filename : null,
+      });
+
+      return successResponse(res, "Article berhasil ditambahkan", article, 201);
+    } catch (error) {
+      console.error(error);
+      return errorResponse(res, 500, "Server Error", [
+        { field: "server", message: error.message },
+      ]);
+    }
+  },
+
+  updateArticle: async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      const id = req.params.id;
+
+      const article = await articleService.updateArticle({
+        id,
+        userId,
+        title: req.body.title,
+        description: req.body.description,
+        category: req.body.category,
+        date: req.body.date,
+        image: req.file ? req.file.filename : null,
+      });
+
+      return successResponse(res, "Article berhasil diperbarui", article);
+    } catch (error) {
+      console.error(error);
+
+      return errorResponse(res, 400, "Bad Request", [
+        { field: "article", message: error.message },
+      ]);
+    }
+  },
+
+  deleteArticle: async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      const id = req.params.id;
+
+      await articleService.deleteArticle({ id, userId });
+
+      return successResponse(res, "Article berhasil dihapus");
+    } catch (error) {
+      console.error(error);
+
+      return errorResponse(res, 400, "Bad Request", [
+        { field: "article", message: error.message },
+      ]);
     }
   },
 };

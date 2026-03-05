@@ -14,11 +14,7 @@ const blogValidator = {
       .withMessage("Judul minimal terdiri dari 5 karakter"),
 
     body("date")
-      .exists()
-      .withMessage("Tanggal wajib diisi")
-      .bail()
-      .notEmpty()
-      .withMessage("Tanggal wajib diisi")
+      .optional()
       .isISO8601()
       .withMessage(
         "Format tanggal tidak valid (gunakan format ISO 8601, contoh: 2025-08-01)",
@@ -90,6 +86,7 @@ const blogValidator = {
   ],
 
   getById: [param("id").isMongoId().withMessage("ID tidak valid")],
+  delete: [param("id").isMongoId().withMessage("ID tidak valid")],
 };
 
 module.exports = blogValidator;
