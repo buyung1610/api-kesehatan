@@ -4,10 +4,10 @@ const { successResponse, errorResponse } = require("../../helpers/response");
 const authControllers = {
   login: async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { username, password } = req.body;
 
       const result = await authService.login(
-        email,
+        username,
         password,
         process.env.SECRET_KEY,
       );
@@ -20,7 +20,7 @@ const authControllers = {
       if (error.message === "USER_NOT_FOUND") {
         return errorResponse(res, 401, "Validation Error", [
           {
-            field: "email",
+            field: "username",
             message: "Username tidak ditemukan",
           },
         ]);
@@ -46,17 +46,17 @@ const authControllers = {
 
   register: async (req, res) => {
     try {
-      const { name, email, username, password } = req.body;
+      const { name, username, password } = req.body;
 
-      await authService.register(name, email, username, password);
+      await authService.register(name, username, password);
 
       return successResponse(res, "Registrasi berhasil");
     } catch (error) {
-      if (error.message === "EMAIL_EXISTS") {
+      if (error.message === "USERNAME_EXISTS") {
         return errorResponse(res, 400, "Validation Error", [
           {
-            field: "email",
-            message: "Email sudah digunakan",
+            field: "username",
+            message: "Username sudah digunakan",
           },
         ]);
       }

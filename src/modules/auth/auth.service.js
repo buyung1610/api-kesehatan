@@ -4,8 +4,8 @@ const jwt = require("jsonwebtoken");
 const BlacklistToken = require("./blacklistToken.model");
 
 const authService = {
-  login: async (email, password, SECRET_KEY) => {
-    const user = await User.findOne({ email });
+  login: async (username, password, SECRET_KEY) => {
+    const user = await User.findOne({ username });
     if (!user) {
       throw new Error("USER_NOT_FOUND");
     }
@@ -28,17 +28,16 @@ const authService = {
     return { token, user: payload };
   },
 
-  register: async (name, email, username, password) => {
-    const existingUser = await User.findOne({ email });
+  register: async (name, username, password) => {
+    const existingUser = await User.findOne({ username });
     if (existingUser) {
-      throw new Error("EMAIL_EXISTS");
+      throw new Error("USERNAME_EXISTS");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new User({
       name,
-      email,
       username,
       password: hashedPassword,
     });
@@ -67,7 +66,6 @@ const authService = {
       id: user._id,
       name: user.name,
       username: user.username,
-      email: user.email,
     };
   },
 };
