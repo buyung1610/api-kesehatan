@@ -8,7 +8,7 @@ async function seedArticles() {
   const uploadDir = path.join(__dirname, "../uploads");
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-  await User.deleteMany({ email: { $in: ["beni@gmail.com", "edo@gmail.com"] } });
+  await User.deleteMany({ username: { $in: ["beni", "edo"] } });
 
   const hashedPasswordBeni = await bcrypt.hash("passwordBeni2", 10);
   const hashedPasswordEdo = await bcrypt.hash("passwordEdo2", 10);
@@ -17,15 +17,11 @@ async function seedArticles() {
     {
       name: "Beni",
       username: "beni",
-      email: "beni@gmail.com",
-      appSource: "kesehatan",
       password: hashedPasswordBeni,
     },
     {
       name: "Edo",
       username: "edo",
-      email: "edo@gmail.com",
-      appSource: "kesehatan",
       password: hashedPasswordEdo,
     },
   ]);
