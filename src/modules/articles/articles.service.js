@@ -24,6 +24,7 @@ const articlesService = {
       date: article.date.toISOString().split("T")[0],
       image: `uploads/${article.image}`,
       description: article.description,
+      category: article.category,
       name: article.userId.name,
     }));
 
@@ -57,6 +58,7 @@ const articlesService = {
       date: article.date.toISOString().split("T")[0],
       image: `uploads/${article.image}`,
       description: article.description,
+      category: article.category,
       name: article.userId.name,
     }));
 
@@ -80,6 +82,7 @@ const articlesService = {
       date: article.date.toISOString().split("T")[0],
       image: `uploads/${article.image}`,
       description: article.description,
+      category: article.category,
       name: article.userId?.name || null,
     };
   },

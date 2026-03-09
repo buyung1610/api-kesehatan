@@ -39,6 +39,7 @@ cron.schedule('0 0 * * *', async () => {
   }
 });
 
+
 const port = process.env.PORT;
 const host = process.env.HOST || "localhost";
 
