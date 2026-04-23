@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const connectDB = require("./config/connectDb");
@@ -6,7 +7,6 @@ const cors = require("cors");
 const path = require("path");
 const cron = require("node-cron");
 const seedArticles = require("./seeders/articlesSeeder");
-require("dotenv").config();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -43,8 +43,6 @@ cron.schedule("0 0 * * *", async () => {
     console.error("Error di cron job:", error);
   }
 });
-
-seedArticles();
 
 const port = process.env.PORT;
 const host = process.env.HOST || "localhost";
