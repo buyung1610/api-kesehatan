@@ -35,6 +35,8 @@ const authControllers = {
         ]);
       }
 
+      console.error("LOGIN ERROR:", error);
+
       return errorResponse(res, 500, "Server Error", [
         {
           field: "server",
@@ -47,6 +49,8 @@ const authControllers = {
   register: async (req, res) => {
     try {
       const { name, username, password } = req.body;
+
+      console.log("BODY:", req.body);
 
       await authService.register(name, username, password);
 
@@ -61,10 +65,12 @@ const authControllers = {
         ]);
       }
 
-      return errorResponse(res, 500, "Server Error", [
+      console.error("REGISTER ERROR:", error);
+
+      return errorResponse(res, 500, error.message, [
         {
           field: "server",
-          message: "Terjadi kesalahan server",
+          message: error.message,
         },
       ]);
     }
@@ -78,10 +84,12 @@ const authControllers = {
 
       return successResponse(res, "Logout berhasil, token di-blacklist");
     } catch (error) {
-      return errorResponse(res, 500, "Server Error", [
+      console.error("LOGOUT ERROR:", error);
+
+      return errorResponse(res, 500, error.message, [
         {
           field: "server",
-          message: "Terjadi kesalahan server",
+          message: error.message,
         },
       ]);
     }
@@ -101,6 +109,8 @@ const authControllers = {
           },
         ]);
       }
+
+      console.error("GET PROFILE ERROR:", error);
 
       return errorResponse(res, 500, "Server Error", [
         {
