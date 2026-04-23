@@ -47,9 +47,17 @@ cron.schedule("0 0 * * *", async () => {
 const port = process.env.PORT;
 const host = process.env.HOST || "localhost";
 
-connectDB();
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.use(routes);
+    app.listen(port, host, () => {
+      console.log(`Example app listening at http://${host}:${port}`);
+    });
+  } catch (error) {
+    console.error("Gagal menjalankan server:", error);
+    process.exit(1);
+  }
+};
 
-app.use(routes);
-app.listen(port, host, () => {
-  console.log(`Example app listening at http://${host}:${port}`);
-});
+startServer();
