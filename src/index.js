@@ -44,7 +44,7 @@ cron.schedule("0 0 * * *", async () => {
   }
 });
 
-await seedArticles();
+seedArticles();
 
 const port = process.env.PORT;
 const host = process.env.HOST || "localhost";
