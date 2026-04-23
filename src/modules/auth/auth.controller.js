@@ -69,7 +69,7 @@ const authControllers = {
 
       return errorResponse(res, 500, error.message, [
         {
-          field: "server",
+          field: "serverdddd",
           message: error.message,
         },
       ]);
