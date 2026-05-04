@@ -69,7 +69,7 @@ const authControllers = {
 
       return errorResponse(res, 500, error.message, [
         {
-          field: "serverdddd",
+          field: "server",
           message: error.message,
         },
       ]);
@@ -116,6 +116,47 @@ const authControllers = {
         {
           field: "server",
           message: "Terjadi kesalahan server",
+        },
+      ]);
+    }
+  },
+
+  updateProfile: async (req, res) => {
+    try {
+      const { name, username, password } = req.body;
+      const result = await authService.updateProfile(
+        req.user.id,
+        name,
+        username,
+        password,
+      );
+      return successResponse(res, "Berhasil memperbarui profil", result);
+    } catch (error) {
+      if (error.message === "USER_NOT_FOUND") {
+        return errorResponse(res, 404, "Validation Error", [
+          {
+            field: "user",
+            message: "User tidak ditemukan",
+          },
+        ]);
+      }
+
+      if (error.message === "USERNAME_EXISTS") {
+        return errorResponse(res, 400, "Validation Error", [
+          {
+            field: "username",
+            message: "Username sudah digunakan",
+          },
+        ]);
+      }
+
+      console.error("UPDATE PROFILE ERROR:", error);
+
+      return errorResponse(res, 500, "Server Error", [
+        {
+          field: "server",
+          message: "Terjadi kesalahan server",
+          error: error.message,
         },
       ]);
     }

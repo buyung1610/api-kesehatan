@@ -68,6 +68,38 @@ const authService = {
       username: user.username,
     };
   },
+
+  updateProfile: async (userId, name, username, password) => {
+    if (username) {
+      const existingUser = await User.findOne({ username, _id: { $ne: userId } });
+      if (existingUser) {
+        throw new Error("USERNAME_EXISTS");
+      }
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error("USER_NOT_FOUND");
+    }
+
+    // Hash password jika diubah
+    let hashedPassword = user.password;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
+
+    user.name = name || user.name;
+    user.username = username || user.username;
+    user.password = hashedPassword;
+
+    await user.save();
+
+    return {
+      id: user._id,
+      name: user.name,
+      username: user.username,
+    };
+  },
 };
 
 module.exports = authService;
