@@ -12,6 +12,8 @@ const authControllers = {
         process.env.SECRET_KEY,
       );
 
+      console.log("loogginnn", result);
+
       return successResponse(res, "Login berhasil", {
         token: result.token,
         user: result.user,
