@@ -25,7 +25,7 @@ const articlesService = {
       image: `uploads/${article.image}`,
       description: article.description,
       category: article.category,
-      name: article.userId.name,
+      name: article.userId?.name || null,
     }));
 
     return {
@@ -59,7 +59,7 @@ const articlesService = {
       image: `uploads/${article.image}`,
       description: article.description,
       category: article.category,
-      name: article.userId.name,
+      name: article.userId?.name || null,
     }));
 
     return {
